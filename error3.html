@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Error Reporting</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    #errorDisplay {
+      background-color: #ffe6e6;
+      color: #d8000c;
+      padding: 15px;
+      margin-top: 0px;
+      border: 2px dashed #d8000c;
+      border-radius: 8px;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 0.95em;
+      white-space: pre-wrap; /* 改行を維持 */
+      display: none;
+      position: relative;
+      cursor: pointer;
+      transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    }
+    #errorDisplay:hover {
+      background-color: #ffd2d2;
+      box-shadow: 0 0 10px rgba(216, 0, 12, 0.5);
+    }
+    #errorDisplay::after {
+      content: "クリックしてコピー";
+      position: absolute;
+      bottom: -20px;
+      right: 10px;
+      font-size: 0.8em;
+      color: #d8000c;
+      background-color: #fff;
+      padding: 2px 5px;
+      border-radius: 3px;
+      border: 1px solid #d8000c;
+    }
+    #copyMessage {
+      font-size: 0.9em;
+      color: #00529b;
+      margin-top: 10px;
+      display: none;
+      animation: fadeOut 2s ease-in-out;
+    }
+    @keyframes fadeOut {
+      0% { opacity: 1; }
+      100% { opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+  <h1>My Web App</h1>
+  <p>If an error occurs, the details will be displayed below.</p>
+  <div id="errorTitle"></div>
+  <div id="errorDisplay" title="クリックしてコピー"></div>
+  <div id="copyMessage">エラー情報をクリップボードにコピーしました</div>
+  <div>Main Content</div>
+
+  <script>
+    function displayError(details) {
+      const errorTitle = document.getElementById('errorTitle');
+      const errorDisplay = document.getElementById('errorDisplay');
+      const copyMessage = document.getElementById('copyMessage');
+
+      // エラー情報を表示
+      errorTitle.textContent = '想定外のエラーが発生しました。以下のメッセージを添えてお知らせください。';
+      errorDisplay.style.display = 'block';
+      errorDisplay.textContent = details;
+
+      // クリックでクリップボードにコピー
+      errorDisplay.onclick = async () => {
+        try {
+          await navigator.clipboard.writeText(details);
+          copyMessage.style.display = 'block'; // コピー成功メッセージを表示
+          setTimeout(() => copyMessage.style.display = 'none', 2000); // 2秒後に非表示
+        } catch (err) {
+          alert('Failed to copy error details to clipboard.');
+          console.error('Clipboard copy failed:', err);
+        }
+      };
+    }
+    function func3() {
+        nonExistentFunction();
+    }
+    function func2() {
+        func3();
+    }
+    function func1() {
+        func2();
+    }
+    // window.onerrorを使ってエラーをキャッチ
+    window.onerror = function (message, source, lineno, colno, error) {
+      const errorDetails = `${error?.stack || error || 'N/A'}`.trim();
+      console.error('Error caught:', errorDetails);
+      displayError(errorDetails);
+    };
+
+    // デモ用エラー発生コード (コメントアウトして使用)
+    func1();
+  </script>
+</body>
+</html>

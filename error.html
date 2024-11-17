@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Error Reporting</title>
+  <style>
+    #errorDisplay {
+      background-color: #ffe6e6;
+      color: #d8000c;
+      padding: 10px;
+      margin: 20px;
+      border: 1px solid #d8000c;
+      border-radius: 5px;
+      font-family: Arial, sans-serif;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>My Web App</h1>
+  <div id="errorDisplay"></div>
+
+  <script>
+    // エラーメッセージを表示する関数
+    function displayError(message) {
+      const errorDisplay = document.getElementById('errorDisplay');
+      errorDisplay.style.display = 'block';
+      errorDisplay.textContent = `${message}`;
+    }
+
+    // window.onerrorを利用してエラーハンドリング
+    window.onerror = function (message, source, lineno, colno, error) {
+      // 詳細なエラー情報をコンソールに出力
+      console.error('Error caught:', { message, source, lineno, colno, error });
+
+      // 一般ユーザー向けのメッセージ表示
+      displayError(`このエラーメッセージをお知らせください。'${message}' at ${source}:${lineno}`);
+    };
+
+    // 実験的エラー (デモ用)
+    // 正常なコードではコメントアウトしてください
+    nonExistentFunction();
+  </script>
+</body>
+</html>

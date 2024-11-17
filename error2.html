@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Error Reporting</title>
+  <style>
+    #errorDisplay {
+      background-color: #ffe6e6;
+      color: #d8000c;
+      padding: 10px;
+      margin: 20px;
+      border: 1px solid #d8000c;
+      border-radius: 5px;
+      font-family: Arial, sans-serif;
+      display: none;
+      cursor: pointer;
+      white-space: pre-wrap; /* 改行を維持 */
+    }
+    #copyMessage {
+      font-size: 0.9em;
+      color: #00529b;
+      margin-top: 10px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>My Web App</h1>
+  <div id="errorDisplay" title="Click to copy error details"></div>
+  <div id="copyMessage">エラー詳細をクリップボードにコピーできました</div>
+
+  <script>
+    function displayError(details) {
+      const errorDisplay = document.getElementById('errorDisplay');
+      const copyMessage = document.getElementById('copyMessage');
+
+      // エラー情報を表示
+      errorDisplay.style.display = 'block';
+      errorDisplay.textContent = details;
+
+      // クリックでクリップボードにコピー
+      errorDisplay.onclick = async () => {
+        try {
+          await navigator.clipboard.writeText(details);
+          copyMessage.style.display = 'block'; // コピー成功メッセージを表示
+          setTimeout(() => copyMessage.style.display = 'none', 2000); // 2秒後に非表示
+        } catch (err) {
+          alert('Failed to copy error details to clipboard.');
+          console.error('Clipboard copy failed:', err);
+        }
+      };
+    }
+
+    function func3() {
+        nonExistentFunction();
+    }
+    function func2() {
+        func3();
+    }
+    function func1() {
+        func2();
+    }
+
+    // window.onerrorを使ってエラーをキャッチ
+    window.onerror = function (message, source, lineno, colno, error) {
+      const errorDetails = `${error?.stack || error || 'N/A'}`.trim();
+      console.error('Error caught:', errorDetails);
+      displayError(errorDetails);
+    };
+
+    // デモ用エラー発生コード (コメントアウトして使用)
+    func1();
+  </script>
+</body>
+</html>
