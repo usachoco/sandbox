@@ -33,6 +33,11 @@ jobs:
 
           echo "{\"latestPrMergedAt\": \"$LATEST_PR_DATE\"}" > data.json
 
+          # ★ここから追加★ 生成された data.json の内容をログに出力
+          echo "--- Content of generated data.json ---"
+          cat data.json
+          echo "--------------------------------------"
+          
       - name: Commit and push if changed
         run: |
           git config user.name "github-actions[bot]"
