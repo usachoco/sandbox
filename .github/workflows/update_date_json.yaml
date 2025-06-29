@@ -39,7 +39,7 @@ jobs:
 
             const utcDate = new Date('$LATEST_PR_DATE_UTC');
             // 'Asia/Tokyo' は日本標準時のタイムゾーンID
-            const jstDate = utcToZonedTime(utcDate, 'Asia/Tokyo');
+            const jstDate = toZonedTime(utcDate, 'Asia/Tokyo');
             // 'yyyy-MM-dd HH:mm' 形式でフォーマット
             const formattedDate = format(jstDate, 'yyyy-MM-dd HH:mm');
             console.log(formattedDate);
