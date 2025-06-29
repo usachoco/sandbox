@@ -3,9 +3,7 @@ name: Update Latest PR Date
 on:
   push:
     branches:
-      - main # mainブランチへのプッシュをトリガーにする
-    # paths-ignore:
-    #   - 'data.json' # data.json の変更ではトリガーしないようにする (補助的な役割)
+      - main
 
 jobs:
   update-data:
@@ -14,17 +12,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          # プッシュイベントの場合、GitHub Actionsが自動的にトークンを発行します
-          # そのトークンでコミットを行うと、デフォルトではワークフローが再トリガーされます。
-          # これを避けるために、個人アクセストークン（PAT）を使うか、
-          # GitHub Appsのトークンを使う方法があります。
-          # ただし、最も簡単なのは 'actions/checkout' の 'persist-credentials: false' と
-          # コミットユーザーの設定を組み合わせる方法です。
-          # ここでは、GitHub ActionsのデフォルトのGITHUB_TOKENを使いつつ、
-          # コミガー名とメールアドレスを特定のものに設定して、
-          # それによって生成されたコミットがトリガーにならないようにします。
-          # これはGitHubの内部的な挙動に依存するため、将来的に変更される可能性も考慮する必要があります。
-          persist-credentials: false # これが重要！GITHUB_TOKENでコミットしてもトリガーされないようにする
+          # persist-credentials: false を削除し、デフォルトの GITHUB_TOKEN を使用します。
+          # GITHUB_TOKEN はデフォルトで persist-credentials: true のように振る舞い、
+          # このトークンでのプッシュは通常、ワークフローを再トリガーしません。
+          token: ${{ secrets.GITHUB_TOKEN }} # 明示的に GITHUB_TOKEN を渡す
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -34,26 +25,22 @@ jobs:
       - name: Get latest merged PR date
         id: get_pr_date
         run: |
-          # ここでGitHub APIを呼び出し、最新のPRの日時を取得します。
-          # 例: gh CLIを使用
-          # gh auth setup-git
-          # gh pr list --state closed --base main --sort updated --direction desc --limit 1 --json mergedAt | jq -r '.[0].mergedAt' > pr_date.txt
-          # APIを直接curlで叩く例:
           LATEST_PR_DATE=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
             "https://api.github.com/repos/${{ github.repository }}/pulls?state=closed&base=main&sort=updated&direction=desc&per_page=1" | \
             jq -r '.[0].merged_at')
 
           echo "Latest PR date: $LATEST_PR_DATE"
 
-          # data.jsonを更新
           echo "{\"latestPrMergedAt\": \"$LATEST_PR_DATE\"}" > data.json
 
       - name: Commit and push if changed
         run: |
           # Git設定
-          git config user.name "github-actions[bot]" # GitHub Actionsの公式botユーザー名
-          git config user.email "github-actions[bot]@users.noreply.github.com" # GitHub Actionsの公式botメールアドレス
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
 
           git add data.json
-          git diff --quiet || git commit -m "Update latest PR date [skip ci]" # 変更がある場合のみコミット
-          git push # デフォルトのGITHUB_TOKENでプッシュ
+          # 変更があるか確認し、あればコミットしてプッシュ
+          # GITHUB_TOKEN が actions/checkout で設定されているため、
+          # git push コマンドだけで認証情報が利用されます。
+          git diff --quiet || (git commit -m "Update latest PR date [skip ci]" && git push)
