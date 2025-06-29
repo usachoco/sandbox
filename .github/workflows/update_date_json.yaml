@@ -31,9 +31,16 @@ jobs:
 
           echo "Latest PR date: $LATEST_PR_DATE"
 
+          # ★ここから修正・追加★
+          # 既存の data.json があれば削除
+          if [ -f data.json ]; then
+            echo "Deleting existing data.json..."
+            rm data.json
+          fi
+
+          # data.json を新規作成/上書き
           echo "{\"latestPrMergedAt\": \"$LATEST_PR_DATE\"}" > data.json
 
-          # ★ここから追加★ 生成された data.json の内容をログに出力
           echo "--- Content of generated data.json ---"
           cat data.json
           echo "--------------------------------------"
