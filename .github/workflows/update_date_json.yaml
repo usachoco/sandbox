@@ -6,10 +6,10 @@ on:
     branches:
       - main # mainブランチへのPRのみ
     paths-ignore:
-      - 'data.json' # data.json 自身の変更ではトリガーしない（コミットログをクリーンに保つため）
+      - 'date.json' # date.json 自身の変更ではトリガーしない（コミットログをクリーンに保つため）
 
 jobs:
-  update-data:
+  update-date:
     if: github.event.pull_request.merged == true && contains(github.event.pull_request.labels.*.name, 'release')
     runs-on: ubuntu-latest
     steps:
@@ -50,7 +50,7 @@ jobs:
 
           echo "Formatted JST Date: $FORMATTED_JST_DATE"
 
-          # data.json を作成/上書き
+          # date.json を作成/上書き
           echo "{\"latestPrMergedAt\": \"$FORMATTED_JST_DATE\"}" > date.json
           
       - name: Commit and push if changed
