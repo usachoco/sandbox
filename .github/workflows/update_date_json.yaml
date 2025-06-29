@@ -1,12 +1,16 @@
 name: Update Latest PR Date
 
 on:
-  push:
+  pull_request: # プルリクエストイベントをトリガーにする
+    types: [closed] # クローズされた時のみ
     branches:
-      - main
+      - main # mainブランチへのPRのみ
+    paths-ignore:
+      - 'data.json' # data.json 自身の変更ではトリガーしない（コミットログをクリーンに保つため）
 
 jobs:
   update-data:
+    if: github.event.pull_request.merged == true && contains(github.event.pull_request.labels.*.name, 'release')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -22,15 +26,14 @@ jobs:
       - name: Install date-fns
         run: npm install date-fns date-fns-tz # date-fns-tzはタイムゾーン処理に必要
 
-      - name: Get latest merged PR date and format in JST
+      - name: Get and format PR merged date in JST
         id: get_formatted_pr_date
         run: |
-          # GitHub APIから最新のPR日時 (UTC) を取得
-          LATEST_PR_DATE_UTC=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            "https://api.github.com/repos/${{ github.repository }}/pulls?state=closed&base=main&sort=updated&direction=desc&per_page=1" | \
-            jq -r '.[0].merged_at')
+          # ワークフローをトリガーしたPRのマージ日時を直接取得
+          # GitHub Actionsのコンテキスト変数から日時を取得します
+          LATEST_PR_DATE_UTC="${{ github.event.pull_request.merged_at }}"
 
-          echo "Latest PR date (UTC): $LATEST_PR_DATE_UTC"
+          echo "Triggering PR merged at (UTC): $LATEST_PR_DATE_UTC"
 
           # JavaScriptで日時をJSTに変換し、フォーマット
           FORMATTED_JST_DATE=$(node -e "
@@ -54,12 +57,8 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          if ! git diff --quiet date.json; then
-            echo "Changes detected in date.json. Committing and pushing..."
-            git add date.json
-            git commit -m "Update latest PR date [skip ci]"
-            git push
-            echo "Committed and pushed date.json."
-          else
-            echo "No changes detected in data.json. Skipping commit and push."
-          fi
+          echo "Changes detected in date.json. Committing and pushing..."
+          git add date.json
+          git commit -m "Update latest PR date [skip ci]"
+          git push
+          echo "Committed and pushed date.json."
