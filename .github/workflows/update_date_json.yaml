@@ -19,13 +19,36 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Get latest merged PR date
-        id: get_pr_date
+      - name: Install date-fns
+        run: npm install date-fns date-fns-tz # date-fns-tzはタイムゾーン処理に必要
+
+      - name: Get latest merged PR date and format in JST
+        id: get_formatted_pr_date
         run: |
-          LATEST_PR_DATE=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+          # GitHub APIから最新のPR日時 (UTC) を取得
+          LATEST_PR_DATE_UTC=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
             "https://api.github.com/repos/${{ github.repository }}/pulls?state=closed&base=main&sort=updated&direction=desc&per_page=1" | \
             jq -r '.[0].merged_at')
-          echo "{\"latestPrMergedAt\": \"$LATEST_PR_DATE\"}" > date.json
+
+          echo "Latest PR date (UTC): $LATEST_PR_DATE_UTC"
+
+          # JavaScriptで日時をJSTに変換し、フォーマット
+          FORMATTED_JST_DATE=$(node -e "
+            const { format } = require('date-fns');
+            const { utcToZonedTime } = require('date-fns-tz');
+
+            const utcDate = new Date('$LATEST_PR_DATE_UTC');
+            // 'Asia/Tokyo' は日本標準時のタイムゾーンID
+            const jstDate = utcToZonedTime(utcDate, 'Asia/Tokyo');
+            // 'yyyy-MM-dd HH:mm' 形式でフォーマット
+            const formattedDate = format(jstDate, 'yyyy-MM-dd HH:mm');
+            console.log(formattedDate);
+          ")
+
+          echo "Formatted JST Date: $FORMATTED_JST_DATE"
+
+          # data.json を作成/上書き
+          echo "{\"latestPrMergedAt\": \"$FORMATTED_JST_DATE\"}" > date.json
           
       - name: Commit and push if changed
         run: |
