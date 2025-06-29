@@ -35,7 +35,7 @@ jobs:
           # JavaScriptで日時をJSTに変換し、フォーマット
           FORMATTED_JST_DATE=$(node -e "
             const { format } = require('date-fns');
-            const { utcToZonedTime } = require('date-fns-tz');
+            const { toZonedTime } = require('date-fns-tz');
 
             const utcDate = new Date('$LATEST_PR_DATE_UTC');
             // 'Asia/Tokyo' は日本標準時のタイムゾーンID
