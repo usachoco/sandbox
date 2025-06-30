@@ -1,16 +1,18 @@
 name: Update Latest PR Date
 
 on:
-  pull_request: # プルリクエストイベントをトリガーにする
-    types: [closed] # クローズされた時のみ
+  pull_request:
+    types: [closed]
     branches:
-      - main # mainブランチへのPRのみ
+      - main
     paths-ignore:
-      - 'date.json' # date.json 自身の変更ではトリガーしない（コミットログをクリーンに保つため）
+      - '/data/date.json'
 
 jobs:
   update-date:
-    if: github.event.pull_request.merged == true && contains(github.event.pull_request.labels.*.name, 'release')
+    if: 
+      github.event.pull_request.merged == true && 
+      contains(github.event.pull_request.labels.*.name, 'release')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -24,41 +26,26 @@ jobs:
           node-version: '20'
 
       - name: Install date-fns
-        run: npm install date-fns date-fns-tz # date-fns-tzはタイムゾーン処理に必要
+        run: npm install date-fns date-fns-tz
 
       - name: Get and format PR merged date in JST
         id: get_formatted_pr_date
         run: |
-          # ワークフローをトリガーしたPRのマージ日時を直接取得
-          # GitHub Actionsのコンテキスト変数から日時を取得します
           LATEST_PR_DATE_UTC="${{ github.event.pull_request.merged_at }}"
-
-          echo "Triggering PR merged at (UTC): $LATEST_PR_DATE_UTC"
-
-          # JavaScriptで日時をJSTに変換し、フォーマット
           FORMATTED_JST_DATE=$(node -e "
             const { format } = require('date-fns');
             const { toZonedTime } = require('date-fns-tz');
-
             const utcDate = new Date('$LATEST_PR_DATE_UTC');
-            // 'Asia/Tokyo' は日本標準時のタイムゾーンID
             const jstDate = toZonedTime(utcDate, 'Asia/Tokyo');
-            // 'yyyy-MM-dd HH:mm' 形式でフォーマット
             const formattedDate = format(jstDate, 'yyyy-MM-dd HH:mm');
             console.log(formattedDate);
           ")
-
-          echo "Formatted JST Date: $FORMATTED_JST_DATE"
-
-          # date.json を作成/上書き
-          echo "{\"latestPrMergedAt\": \"$FORMATTED_JST_DATE\"}" > date.json
+          echo "{\"latestPrMergedAt\": \"$FORMATTED_JST_DATE\"}" > /data/date.json
           
       - name: Commit and push if changed
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          echo "Changes detected in date.json. Committing and pushing..."
           git add date.json
-          git commit -m "Update latest PR date [skip ci]"
+          git commit -m "リリース日時の更新"
           git push
-          echo "Committed and pushed date.json."
