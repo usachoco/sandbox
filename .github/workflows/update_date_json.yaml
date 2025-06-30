@@ -6,7 +6,7 @@ on:
     branches:
       - main
     paths-ignore:
-      - '/data/date.json'
+      - './data/date.json'
 
 jobs:
   update-date:
@@ -40,7 +40,7 @@ jobs:
             const formattedDate = format(jstDate, 'yyyy-MM-dd HH:mm');
             console.log(formattedDate);
           ")
-          echo "{\"latestPrMergedAt\": \"$FORMATTED_JST_DATE\"}" > /data/date.json
+          echo "{\"latestPrMergedAt\": \"$FORMATTED_JST_DATE\"}" > ./data/date.json
           
       - name: Commit and push if changed
         run: |
