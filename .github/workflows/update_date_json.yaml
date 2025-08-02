@@ -26,6 +26,7 @@ jobs:
           node-version: '20'
 
       - name: Install date-fns
+        working-directory: workspace
         run: npm install date-fns date-fns-tz
 
       - name: Get and format PR merged date in JST
