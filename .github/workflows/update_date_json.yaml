@@ -31,6 +31,7 @@ jobs:
 
       - name: Get and format PR merged date in JST
         id: get_formatted_pr_date
+        working-directory: workspace
         run: |
           LATEST_PR_DATE_UTC="${{ github.event.pull_request.merged_at }}"
           FORMATTED_JST_DATE=$(node -e "
@@ -41,7 +42,7 @@ jobs:
             const formattedDate = format(jstDate, 'yyyy-MM-dd HH:mm');
             console.log(formattedDate);
           ")
-          echo "{\"latestPrMergedAt\": \"$FORMATTED_JST_DATE\"}" > ./data/date.json
+          echo "{\"latestPrMergedAt\": \"$FORMATTED_JST_DATE\"}" > ../data/date.json
           
       - name: Commit and push if changed
         run: |
