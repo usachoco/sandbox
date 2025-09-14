@@ -1,3 +1,3 @@
 # sandbox
 
-master site
+main site
