@@ -18,6 +18,7 @@ jobs:
 
       - name: ファイルをまとめる
         run: |
+          cat README.md
           mkdir work
           mv ./README.md ./new_file.txt ./work
 
