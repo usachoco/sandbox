@@ -36,6 +36,7 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
           # リポジトリクローン
+          rm -rf staging_repo
           git clone https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/usachoco/staging-sandbox.git staging_repo
           cd staging_repo
 
@@ -52,7 +53,7 @@ jobs:
         with:
           script: |
             const prNumber = context.payload.issue.number;
-            const stagingRepoUrl = 'https://github.com/usachoco/staging-sandbox';
+            const stagingRepoUrl = 'https://usachoco.github.io/staging-sandbox/';
             const previewUrl = `${stagingRepoUrl}`;
             
             github.rest.issues.createComment({
