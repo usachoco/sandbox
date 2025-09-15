@@ -18,7 +18,6 @@ jobs:
 
       - name: ファイルをまとめる
         run: |
-          cat README.md
           mkdir work
           mv ./README.md ./new_file.txt ./work
 
@@ -39,7 +38,7 @@ jobs:
           mv ../work/* .
           
           git add .
-          git commit -m "xxx"
+          git commit -m "xxx" || true
           git push origin main
 
       - name: 結果報告
@@ -54,5 +53,5 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: prNumber,
-              body: `🚀 PRプレビュー環境がデプロイされました！\n\n[stagingリポジトリのブランチ](${previewUrl})`
+              body: `🚀 PRプレビュー環境がデプロイされました！５分ほど待ってから確認してください\n\n[stagingリポジトリのブランチ](${previewUrl})`
             });
