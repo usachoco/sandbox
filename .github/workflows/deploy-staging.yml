@@ -1,19 +1,22 @@
 name: Get new_file.txt
 
 on:
-  pull_request:
-    branches:
-      - main
+  issue_comment:
+    types: [created]
 
 jobs:
   get-file:
+    if: |
+      github.event.issue.pull_request &&
+      startsWith(github.event.comment.body, '/dev') &&
+      (github.actor == 'usachoco')
     runs-on: ubuntu-latest
 
     steps:
       - name: PRの最新状況を取得する
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.ref }}
+          ref: ${{ github.event.issue.pull_request.head.ref }}
 
       - name: ファイルをまとめる
         run: |
