@@ -19,4 +19,10 @@ jobs:
         run: |
           cat new_file.txt
           cat README.md
-      
+
+      - name: 3.ステージングへコピーする
+        run: |
+          # リモートリポジトリを追加
+          git remote add another-repo https://${{ secrets.PAT_TOKEN }}@github.com/usachoco/staging-sandbox.git
+          # 強制プッシュ
+          git push another-repo HEAD:main --force --no-verify
