@@ -15,11 +15,6 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.ref }}
 
-      - name: ファイルの内容を確認する
-        run: |
-          cat new_file.txt
-          cat README.md
-
       - name: ファイルをまとめる
         run: |
           mkdir work
@@ -44,3 +39,18 @@ jobs:
           git add .
           git commit -m "xxx"
           git push origin main
+
+      - name: 結果報告
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const prNumber = context.payload.issue.number;
+            const stagingRepoUrl = 'https://usachoco.github.io/staging-sandbox';
+            const previewUrl = `${stagingRepoUrl}/README.md`;
+            
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              body: `🚀 PRプレビュー環境がデプロイされました！\n\n[stagingリポジトリのブランチ](${previewUrl})`
+            });
