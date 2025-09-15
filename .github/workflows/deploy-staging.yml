@@ -45,7 +45,7 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            const prNumber = context.payload.issue.number;
+            const prNumber = context.payload.pull_request.number;
             const stagingRepoUrl = 'https://usachoco.github.io/staging-sandbox';
             const previewUrl = `${stagingRepoUrl}/README.md`;
             
