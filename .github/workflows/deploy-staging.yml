@@ -16,7 +16,7 @@ jobs:
       - name: PRの最新状況を取得する
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.issue.pull_request.head.ref }}
+          ref: ${{ github.event.pull_request.head.ref }}
 
       - name: ファイルをまとめる
         run: |
