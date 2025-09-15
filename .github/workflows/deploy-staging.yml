@@ -21,8 +21,15 @@ jobs:
           cat README.md
 
       - name: 3.ステージングへコピーする
+        env:
+          PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
+          # アカウント設定
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
           # リモートリポジトリを追加
-          git remote add another-repo https://${{ secrets.PAT_TOKEN }}@github.com/usachoco/staging-sandbox.git
+          git remote add another-repo https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/usachoco/staging-sandbox.git
+
           # 強制プッシュ
           git push another-repo HEAD:main --force --no-verify
