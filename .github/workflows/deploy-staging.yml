@@ -21,6 +21,7 @@ jobs:
         with:
           ref: ${{ github.event.issue.pull_request.head.ref }}  # 最新のPRの状態を取得する
           token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
 
       - name: Setting Local contents
         run: |
@@ -45,7 +46,7 @@ jobs:
           mv ../tmp_contents/* .
           
           git add .
-          git commit -m "Deploy from ratorio staging branch"
+          git commit -m "Deploy from ratorio staging branch" || true
           git push origin main
 
       - name: Comment on PR with preview URL
@@ -53,8 +54,8 @@ jobs:
         with:
           script: |
             const prNumber = context.payload.issue.number;
-            const stagingRepoUrl = 'https://usachoco.github.io/staging-sandbox/';
-            const previewUrl = `${stagingRepoUrl}`;
+            const stagingRepoUrl = 'https://github.com/usachoco/staging-sandbox';
+            const previewUrl = `${stagingRepoUrl}/tree/pr-${prNumber}`;
             
             github.rest.issues.createComment({
               owner: context.repo.owner,
