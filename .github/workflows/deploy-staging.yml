@@ -54,8 +54,8 @@ jobs:
         with:
           script: |
             const prNumber = context.payload.issue.number;
-            const stagingRepoUrl = 'https://github.com/usachoco/staging-sandbox';
-            const previewUrl = `${stagingRepoUrl}/tree/pr-${prNumber}`;
+            const stagingRepoUrl = 'https://usachoco.github.io/staging-sandbox';
+            const previewUrl = `${stagingRepoUrl}/README.md`;
             
             github.rest.issues.createComment({
               owner: context.repo.owner,
