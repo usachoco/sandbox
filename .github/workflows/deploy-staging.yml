@@ -8,7 +8,7 @@ jobs:
   get-file:
     if: |
       github.event.issue.pull_request &&
-      startsWith(github.event.comment.body, '/dev') &&
+      startsWith(github.event.comment.body, '/go') &&
       (github.actor == 'usachoco')
     runs-on: ubuntu-latest
 
@@ -16,44 +16,49 @@ jobs:
       - name: PRの最新状況を取得する
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.ref }}
+          ref: ${{ github.event.issue.pull_request.head.ref }}
 
-      - name: ファイルをまとめる
+      - name: 確認
         run: |
-          mkdir work
-          mv ./README.md ./new_file.txt ./work
+          cat README.md
 
-      - name: ステージングへコピーする
-        env:
-          PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
-        run: |
-          # アカウント設定
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-
-          # リポジトリクローン
-          git clone https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/usachoco/staging-sandbox.git staging_repo
-          cd staging_repo
-
-          # 既存のファイルをすべて削除し、新しいファイルをコピー
-          rm -rf *
-          mv ../work/* .
-          
-          git add .
-          git commit -m "xxx"
-          git push origin main
-
-      - name: 結果報告
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const prNumber = context.payload.issue.number;
-            const stagingRepoUrl = 'https://usachoco.github.io/staging-sandbox';
-            const previewUrl = `${stagingRepoUrl}/README.md`;
-            
-            github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: prNumber,
-              body: `🚀 PRプレビュー環境がデプロイされました！\n\n[stagingリポジトリのブランチ](${previewUrl})`
-            });
+#
+#      - name: ファイルをまとめる
+#        run: |
+#          mkdir work
+#          mv ./README.md ./new_file.txt ./work
+#
+#      - name: ステージングへコピーする
+#        env:
+#          PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
+#        run: |
+#          # アカウント設定
+#          git config --global user.name "github-actions[bot]"
+#          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+#
+#          # リポジトリクローン
+#          git clone https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/usachoco/staging-sandbox.git staging_repo
+#          cd staging_repo
+#
+#          # 既存のファイルをすべて削除し、新しいファイルをコピー
+#          rm -rf *
+#          mv ../work/* .
+#          
+#          git add .
+#          git commit -m "xxx"
+#          git push origin main
+#
+#      - name: 結果報告
+#        uses: actions/github-script@v6
+#        with:
+#          script: |
+#            const prNumber = context.payload.issue.number;
+#            const stagingRepoUrl = 'https://usachoco.github.io/staging-sandbox';
+#            const previewUrl = `${stagingRepoUrl}/README.md`;
+#            
+#            github.rest.issues.createComment({
+#              owner: context.repo.owner,
+#              repo: context.repo.repo,
+#              issue_number: prNumber,
+#              body: `🚀 PRプレビュー環境がデプロイされました！\n\n[stagingリポジトリのブランチ](${previewUrl})`
+#            });
