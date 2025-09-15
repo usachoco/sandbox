@@ -10,17 +10,22 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 1.PRの最新状況を取得する
+      - name: PRの最新状況を取得する
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.ref }}
 
-      - name: 2.ファイルの内容を確認する
+      - name: ファイルの内容を確認する
         run: |
           cat new_file.txt
           cat README.md
 
-      - name: 3.ステージングへコピーする
+      - name: ファイルをまとめる
+        run: |
+          mkdir work
+          mv ./README.md ./new_file.txt ./work
+
+      - name: ステージングへコピーする
         env:
           PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
@@ -28,8 +33,14 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
-          # リモートリポジトリを追加
-          git remote add another-repo https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/usachoco/staging-sandbox.git
+          # リポジトリクローン
+          git clone https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/usachoco/staging-sandbox.git staging_repo
+          cd staging_repo
 
-          # 強制プッシュ
-          git push another-repo HEAD:main --force --no-verify
+          # 既存のファイルをすべて削除し、新しいファイルをコピー
+          rm -rf *
+          mv ../work/* .
+          
+          git add .
+          git commit -m "xxx"
+          git push origin main
