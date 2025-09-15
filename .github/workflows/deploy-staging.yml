@@ -15,11 +15,8 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.ref }}
 
-      - name: Read new_file.txt
+      - name: 2.ファイルの内容を確認する
         run: |
-          if [ -f "new_file.txt" ]; then
-            cat new_file.txt
-            echo "new_file.txt の内容を読み取りました。"
-          else
-            echo "new_file.txt は見つかりませんでした。"
-          fi
+          cat new_file.txt
+          cat README.md
+      
