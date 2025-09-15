@@ -1,20 +1,63 @@
-name: Deploy Staging
+name: Deploy Staging with Command
 
 on:
-  push:
-    branches:
-      - staging
+  issue_comment:
+    types: [created]
 
 jobs:
   build_and_deploy:
+    if: |
+      github.event.issue.pull_request &&
+      startsWith(github.event.comment.body, '/staging') &&
+      (github.actor == 'usachoco')
     runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+    permissions:
+      contents: write
+      pull-requests: write
 
-      - name: Deploy to Staging
-        uses: peaceiris/actions-gh-pages@v3
+    steps:
+      - name: Checkout Main Repository
+        uses: actions/checkout@v4
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist
-          publish_branch: staging # ステージング用のブランチにデプロイ
+          ref: ${{ github.event.issue.pull_request.head.ref }}  # 最新のPRの状態を取得する
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setting Local contents
+        run: |
+          mkdir tmp_contents
+          mv ./data ./workspace README.md tmp_contents
+
+      - name: Deploy to Staging Repository
+        env:
+          PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
+        run: |
+          # アカウント設定
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+          # リポジトリクローン
+          git clone https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/usachoco/staging-sandbox.git staging_repo
+          cd staging_repo
+
+          # 既存のファイルをすべて削除し、新しいファイルをコピー
+          rm -rf *
+          mv ../tmp_contents/* .
+          
+          git add .
+          git commit -m "Deploy from ratorio staging branch"
+          git push origin main
+
+      - name: Comment on PR with preview URL
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const prNumber = context.payload.issue.number;
+            const stagingRepoUrl = 'https://github.com/usachoco/staging-sandbox';
+            const previewUrl = `${stagingRepoUrl}/tree/pr-${prNumber}`;
+            
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              body: `🚀 PRプレビュー環境がデプロイされました！\n\n[stagingリポジトリのブランチ](${previewUrl})`
+            });
