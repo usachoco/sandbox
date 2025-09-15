@@ -19,7 +19,7 @@ jobs:
       - name: Checkout Main Repository
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.issue.pull_request.head.ref }}  # 最新のPRの状態を取得する
+          ref: ${{ github.event.issue.pull_request.head.sha }}  # 最新のPRの状態を取得する
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
 
