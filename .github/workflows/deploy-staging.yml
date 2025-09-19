@@ -1,9 +1,7 @@
 name: Get new_file.txt
 
 on:
-  pull_request:
-    branches:
-      - main
+  workflow_dispatch:
 
 jobs:
   get-file:
